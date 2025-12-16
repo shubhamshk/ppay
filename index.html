@@ -368,8 +368,67 @@
         }
 
         /* Utils */
-        .hidden {
-            display: none !important;
+        /* Price and Timer Styles */
+        .price-timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .price-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .old-price {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        .new-price {
+            font-size: 2.2rem;
+            color: #ffd700;
+            font-weight: 800;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .timer-display {
+            font-size: 0.95rem;
+            color: #ff4d4d;
+            font-weight: 600;
+            background: rgba(255, 77, 77, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-display span {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -405,7 +464,7 @@
                 <label for="email">Email Address</label>
                 <input type="email" id="email" placeholder="name@example.com" required>
             </div>
-            <button class="next-btn" id="next-btn" disabled>Proceed to Secure Payment</button>
+            <button class="next-btn" id="next-btn" disabled>Proceed</button>
         </div>
 
 
@@ -427,6 +486,20 @@
                 <span>🔒</span> SSL Secure Encryption
             </div>
 
+            <!-- New Price and Timer Section -->
+            <div class="price-timer-container">
+                <div class="price-display">
+                    <div class="old-price">$15</div>
+                    <div class="new-price">$9</div>
+                    <div
+                        style="background: #ffd700; color: #000; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; transform: rotate(-10deg);">
+                        40% OFF</div>
+                </div>
+                <div class="timer-display">
+                    Offer ends in <span id="countdown">01:00:00</span> ⚡
+                </div>
+            </div>
+
             <div id="paypal-buttons-container"></div>
             <!-- PayPal SDK renders buttons here -->
         </div>
@@ -446,10 +519,13 @@
         const paymentModal = document.getElementById('payment-modal');
         const closeModalBtn = document.getElementById('close-modal');
         const paypalContainer = document.getElementById('paypal-buttons-container');
+        const countdownElement = document.getElementById('countdown');
 
         const lockOverlay = document.getElementById('lock-overlay');
         const previewContainer = document.getElementById('preview-container');
         const successMessage = document.getElementById('success-message');
+
+        let timerInterval;
 
         // Email Validation
         emailInput.addEventListener('input', () => {
@@ -488,7 +564,10 @@
             // 2. STRICT RULE: Overflow Hidden
             document.body.classList.add('modal-open');
 
-            // 3. Render Buttons
+            // 3. Start Timer (Reset to 1 hour every time open for demo effect)
+            startTimer(3600); // 3600 seconds = 1 hour
+
+            // 4. Render Buttons
             // We clear and re-render to ensure fresh state
             paypalContainer.innerHTML = '';
             renderPayPalButton(userEmail);
@@ -497,6 +576,38 @@
         function closePaymentModal() {
             paymentModal.classList.remove('active');
             document.body.classList.remove('modal-open');
+            clearInterval(timerInterval); // Stop timer
+        }
+
+        function startTimer(duration) {
+            let timer = duration, hours, minutes, seconds;
+
+            // Clear any existing timer to avoid overlaps
+            if (timerInterval) clearInterval(timerInterval);
+
+            // Update immediately once
+            updateDisplay();
+
+            timerInterval = setInterval(function () {
+                if (--timer < 0) {
+                    timer = 0;
+                    clearInterval(timerInterval);
+                    // Optional: Handle timeout (e.g., disable button or show 00:00:00)
+                }
+                updateDisplay();
+            }, 1000);
+
+            function updateDisplay() {
+                hours = parseInt(timer / 3600, 10);
+                minutes = parseInt((timer % 3600) / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                hours = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                countdownElement.textContent = hours + ":" + minutes + ":" + seconds;
+            }
         }
 
         function renderPayPalButton(userEmail) {
@@ -560,7 +671,26 @@
             previewContainer.querySelector('img').style.filter = 'blur(0) brightness(1)';
 
             // Show Success Message in main card
-            successMessage.style.display = 'block';
+            // Note: successMessage element was selected but not present in HTML above (it was hidden or missing in snippet). 
+            // In the provided code, .success-message class exists but the ID element was not in the body snippet I viewed.
+            // I will create it dynamically if it doesn't exist, or just use the class if I missed it.
+            // Looking at the full file content I read earlier, I missed the ID in my mental model, 
+            // but let's assume the previous code `successMessage.style.display = 'block'` worked, so I won't break it. 
+            // Wait, looking at lines 352-362 of original file, the CSS is there. The HTML element `div id="success-message"` 
+            // was NOT in the original HTML body snippet I read (lines 377-433).
+            // It MUST be added for `handleSuccessUI` to work perfectly. 
+            // I will add it to the body in the main-card to be safe.
+
+            let sm = document.getElementById('success-message');
+            if (!sm) {
+                const mainCard = document.getElementById('main-card');
+                sm = document.createElement('div');
+                sm.id = 'success-message';
+                sm.className = 'success-message';
+                sm.innerHTML = '<h3>Payment Successful!</h3><p>Check your email for access instructions.</p>';
+                mainCard.appendChild(sm);
+            }
+            sm.style.display = 'block';
         }
     </script>
 </body>
