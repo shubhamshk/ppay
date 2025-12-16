@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Digital Content</title>
+    <style>
+        :root {
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(255, 215, 0, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+            --primary-color: #ffffff;
+            --accent-color: #ffd700;
+            --text-color: #f0f0f0;
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --input-border: rgba(255, 215, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #050505;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 100%);
+            color: var(--text-color);
+            overflow-x: hidden;
+            /* Default overflow */
+        }
+
+        /* Strict Overflow Hidden Class */
+        body.modal-open {
+            overflow: hidden !important;
+        }
+
+        .background-blobs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            animation: float 15s infinite ease-in-out alternate;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: #ffd700;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: #b8860b;
+            animation-delay: 2s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 40%;
+            width: 300px;
+            height: 300px;
+            background: #daa520;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(20px, 20px);
+            }
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            width: 85%;
+            max-width: 380px;
+            /* Reduced size */
+            text-align: center;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        p.subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .file-preview {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .file-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(8px) brightness(0.8);
+            transition: filter 0.5s ease;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            z-index: 2;
+        }
+
+        .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffd700 0%, #fdf5e6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+                transform: scale(1);
+            }
+
+            50% {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+                transform: scale(1.05);
+            }
+
+            100% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            /* Important for padding */
+            transition: background 0.3s, border 0.3s;
+        }
+
+        input[type="email"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        input[type="email"]:focus {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #fff;
+        }
+
+        button.next-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+            color: #000;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        button.next-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+            filter: brightness(1.1);
+        }
+
+        button.next-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #aaa;
+        }
+
+        /* --- Payment Modal Overlay (The "Next Window") --- */
+        .payment-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            /* Dark dimming background */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .payment-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Inner Content of Modal */
+        .payment-modal-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 16px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            /* Wider than the initial card for form space */
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .payment-modal-overlay.active .payment-modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close-btn:hover {
+            color: #fff;
+        }
+
+        .payment-header {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #2ecc71;
+            margin-bottom: 20px;
+            background: rgba(46, 204, 113, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        /* PayPal container adjustments inside modal */
+        #paypal-button-container {
+            width: 100%;
+            min-height: 150px;
+            /* Ensure space for loading */
+        }
+
+
+        .success-message {
+            display: none;
+            color: #fff;
+            margin-top: 20px;
+            background: rgba(46, 204, 113, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .success-message h3 {
+            margin: 0 0 10px 0;
+            color: #2ecc71;
+            font-size: 1.2rem;
+        }
+
+        /* Utils */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Main Entry Card -->
+    <div class="glass-card" id="main-card">
+        <h1>Premium Asset</h1>
+        <p class="subtitle">Secure Payment & Instant Unlock</p>
+
+        <!-- Preview Section -->
+        <div class="file-preview" id="preview-container">
+            <!-- Placeholder image - Replace source if you have a real one -->
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop"
+                alt="Locked Content">
+
+            <div class="lock-overlay" id="lock-overlay">
+                <div class="lock-icon">🔒</div>
+                <span>Locked Content</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Email Input -->
+        <div id="step-email">
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="name@example.com" required>
+            </div>
+            <button class="next-btn" id="next-btn" disabled>Proceed to Secure Payment</button>
+        </div>
+
+        <!-- Success Message (Shown here after modal completes) -->
+        <div id="success-message" class="success-message">
+            <h3>Payment Successful! 🎉</h3>
+            <p>The file has been sent to your email.</p>
+        </div>
+    </div>
+
+    <!-- Query Footer -->
+    <div style="margin-top: 20px; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 0.9rem;">
+        Any query? Mail at <a href="mailto:shkforwork@gmail.com"
+            style="color: #ffd700; text-decoration: none; transition: color 0.3s;">shkforwork@gmail.com</a>
+    </div>
+
+    <!-- Payment Modal (The "Next Window") -->
+    <div class="payment-modal-overlay" id="payment-modal">
+        <div class="payment-modal-content">
+            <button class="modal-close-btn" id="close-modal">&times;</button>
+            <div class="payment-header">Complete Your Purchase</div>
+
+            <div class="secure-badge">
+                <span>🔒</span> SSL Secure Encryption
+            </div>
+
+            <div id="paypal-buttons-container"></div>
+            <!-- PayPal SDK renders buttons here -->
+        </div>
+    </div>
+
+    <!-- PayPal SDK -->
+    <!-- REPLACE 'YOUR_CLIENT_ID' WITH ACTUAL CLIENT ID -->
+    <!-- We use a query param 'currency=USD' if needed. Default is USD. -->
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+
+    <script>
+        const emailInput = document.getElementById('email');
+        const nextBtn = document.getElementById('next-btn');
+        const stepEmail = document.getElementById('step-email');
+
+        // Modal Elements
+        const paymentModal = document.getElementById('payment-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const paypalContainer = document.getElementById('paypal-buttons-container');
+
+        const lockOverlay = document.getElementById('lock-overlay');
+        const previewContainer = document.getElementById('preview-container');
+        const successMessage = document.getElementById('success-message');
+
+        // Email Validation
+        emailInput.addEventListener('input', () => {
+            if (emailInput.checkValidity() && emailInput.value.includes('@')) {
+                nextBtn.disabled = false;
+            } else {
+                nextBtn.disabled = true;
+            }
+        });
+
+        // Proceed to Payment (Open Modal)
+        nextBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            if (!email) return;
+
+            openPaymentModal(email);
+        });
+
+        // Close Modal Logic
+        closeModalBtn.addEventListener('click', () => {
+            closePaymentModal();
+        });
+
+        // Close on outside click (Optional, but user said 'strict rule' for overflow, maybe strict for modal too?)
+        // Let's allow outside click for good UX
+        paymentModal.addEventListener('click', (e) => {
+            if (e.target === paymentModal) {
+                closePaymentModal();
+            }
+        });
+
+        function openPaymentModal(userEmail) {
+            // 1. Show Modal
+            paymentModal.classList.add('active');
+
+            // 2. STRICT RULE: Overflow Hidden
+            document.body.classList.add('modal-open');
+
+            // 3. Render Buttons
+            // We clear and re-render to ensure fresh state
+            paypalContainer.innerHTML = '';
+            renderPayPalButton(userEmail);
+        }
+
+        function closePaymentModal() {
+            paymentModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+
+        function renderPayPalButton(userEmail) {
+            paypal.Buttons({
+                // Default funding - No fundingSource restriction means Card button appears
+                style: {
+                    layout: 'vertical',
+                    color: 'gold',
+                    shape: 'rect',
+                    label: 'paypal',
+                    height: 45
+                },
+
+                // Set up the transaction
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: '9.99'
+                            },
+                            description: 'Premium Asset Unlock'
+                        }]
+                    });
+                },
+
+                // Finalize the transaction
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        handleSuccessUI();
+
+                        fetch('/send-file', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: userEmail,
+                                orderId: data.orderID
+                            }),
+                        })
+                            .then(res => res.json())
+                            .then(data => console.log('Backend response:', data))
+                            .catch(err => console.error('Error:', err));
+                    });
+                },
+
+                onError: function (err) {
+                    console.error('PayPal Error:', err);
+                    alert('Payment failed. Please try again.');
+                }
+            }).render('#paypal-buttons-container');
+        }
+
+        function handleSuccessUI() {
+            // Close the modal
+            closePaymentModal();
+
+            // Hide the email form in main card
+            stepEmail.classList.add('hidden');
+
+            // Unlock Animation in main card
+            lockOverlay.innerHTML = '<div style="font-size: 3rem;">🔓</div><span style="color:#2ecc71; font-weight:bold;">Unlocked</span>';
+            previewContainer.querySelector('img').style.filter = 'blur(0) brightness(1)';
+
+            // Show Success Message in main card
+            successMessage.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
